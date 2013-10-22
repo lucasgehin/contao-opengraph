@@ -14,8 +14,8 @@
  */
  
 $GLOBALS['TL_DCA']['tl_page']['palettes']['__selector__'][]          = 'add_opengraph_image';
-$GLOBALS['TL_DCA']['tl_page']['palettes']['regular']                .= ';{opengraph_legend:hide},add_opengraph_image;'; 
-$GLOBALS['TL_DCA']['tl_page']['palettes']['root']                   .= ';{opengraph_legend:hide},add_opengraph_image;';
+$GLOBALS['TL_DCA']['tl_page']['palettes']['regular']                .= ';{opengraph_legend:hide},add_opengraph_image';
+$GLOBALS['TL_DCA']['tl_page']['palettes']['root']                   .= ';{opengraph_legend:hide},add_opengraph_image';
 $GLOBALS['TL_DCA']['tl_page']['subpalettes']['add_opengraph_image']  = 'opengraph_image';
 
 // Fields

@@ -16,16 +16,16 @@
 class OpenGraphHooks extends Controller {
 
 	public function addOpenGraphDefinition($strContent, $strTemplate) {
-		
+
 		if (array_key_exists('opengraph_enable', $GLOBALS['TL_CONFIG'])
 				&& $GLOBALS['TL_CONFIG']['opengraph_enable'] === true
-				&& $strTemplate == 'fe_page') {
-
-			$strContent = str_replace('<html', '<html prefix="og: http://ogp.me/ns#"', $strContent);
+                && $strTemplate == 'fe_page'
+                && strpos($strContent, 'ogp.me') === false) {
+            $strContent = str_replace('<html', '<html prefix="og: http://ogp.me/ns#"', $strContent);
 		}
 		return $strContent;
 	}
-	
+
 	public function addOpenGraphTags(PageModel $objPage, LayoutModel $objLayout, PageRegular $objPageRegular) {
 
 		$blnOG = array('image' => false, 'title' => false, 'url'   => false);

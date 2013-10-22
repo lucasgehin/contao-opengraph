@@ -21,6 +21,5 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['opengraph_enable'] = array(
 		
 );
 
-
 $GLOBALS['TL_DCA']['tl_module']['palettes']['newsreader']  = 
-	str_replace('news_archives', 'news_archives,opengraph_enable', $GLOBALS['TL_DCA']['tl_module']['palettes']['newsreader']);
+	str_replace('news_archives', 'news_archives, opengraph_enable', $GLOBALS['TL_DCA']['tl_module']['palettes']['newsreader']);
