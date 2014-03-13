@@ -19,10 +19,7 @@ class OpenGraphHooks extends \Controller {
 
 	public function addOpenGraphDefinition($strContent, $strTemplate) {
 
-
-        var_dump($GLOBALS['FE_MOD']['news']);
-
-		if (array_key_exists('opengraph_enable', $GLOBALS['TL_CONFIG'])
+        if (array_key_exists('opengraph_enable', $GLOBALS['TL_CONFIG'])
 				&& $GLOBALS['TL_CONFIG']['opengraph_enable'] === true
                 && $strTemplate == 'fe_page'
                 && strpos($strContent, 'ogp.me') === false) {
