@@ -2,20 +2,25 @@
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2013 Leo Feyer
+ * Copyright (C) 2005-2014 Leo Feyer
  *
  *
  * PHP version 5
- * @copyright  Martin Kozianka 2012-2013 <http://kozianka.de/>
+ * @copyright  Martin Kozianka 2012-2014 <http://kozianka.de/>
  * @author     Martin Kozianka <http://kozianka.de/>
  * @package    opengraph
  * @license    LGPL
  * @filesource
  */
 
-class OpenGraphHooks extends Controller {
+namespace OpenGraph;
+
+class OpenGraphHooks extends \Controller {
 
 	public function addOpenGraphDefinition($strContent, $strTemplate) {
+
+
+        var_dump($GLOBALS['FE_MOD']['news']);
 
 		if (array_key_exists('opengraph_enable', $GLOBALS['TL_CONFIG'])
 				&& $GLOBALS['TL_CONFIG']['opengraph_enable'] === true
@@ -26,9 +31,16 @@ class OpenGraphHooks extends Controller {
 		return $strContent;
 	}
 
-	public function addOpenGraphTags(PageModel $objPage, LayoutModel $objLayout, PageRegular $objPageRegular) {
+	public function addOpenGraphTags(\PageModel $objPage, \LayoutModel $objLayout, \PageRegular $objPageRegular) {
 
-		$blnOG = array('image' => false, 'title' => false, 'url'   => false);
+        $objRootPage = \PageModel::findByPk($objPage->rootId);
+
+        if ($objRootPage->opengraph_enable !== '1') {
+            // OpenGraph not enabled in root page
+            return;
+        }
+
+        $blnOG = array('image' => false, 'title' => false, 'url'   => false);
 		
 		if(is_array($GLOBALS['TL_HEAD'])) {
 			foreach ($GLOBALS['TL_HEAD'] as $head) {
@@ -37,54 +49,72 @@ class OpenGraphHooks extends Controller {
 				$blnOG['url']   = $blnOG['url']   || (strpos($head, 'og:url') > 0);
 			}
 		}
-		
+
 		if (!$blnOG['title']) {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->title);
 		}
 		
 		if (!$blnOG['url']) {
-			$url = Environment::get('base').$this->generateFrontendUrl($objPage->row());
+			$url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
 		}
 		
 		if (!$blnOG['image']) {
-			
-			/* TODO :: pageimage
-			$img   = Image::get();
-			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag($img);
-			*/
-		}
-		
-		
-		/*
-		// Get page info
-	    $objRootPage = $this->getPageDetails($objPage->rootId);
 
-		if ($objRootPage->addFavicon)
-		{
-			$objFile = \FilesModel::findByPk($objRootPage->favicon);
-	
-			if ($objFile !== null && is_file(TL_ROOT . '/' . $objFile->path))
-			{
-				// make favicon
-				$favicon = $this->createIcon($objFile->path, ($objRootPage->rootFavicon ? $objRootPage->alias : ''), $objRootPage->fbFavicon);
-			}
+            $filesModel = null;
+            foreach (\PageModel::findParentsById($objPage->id) as $parent) {
+                if ($filesModel === null) {
+                    $filesModel = \FilesModel::findByUuid($parent->opengraph_image);
+                }
+            }
+
+            if ($filesModel != null) {
+                $imgSize              = deserialize($objRootPage->opengraph_size);
+                $img                  = \Image::get($filesModel->path, $imgSize[0], $imgSize[1], $imgSize[2]);
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag($img);
+            }
 		}
-		 */
-		
-		
-		/*
-		print_r(array(
-			$objPage->add_opengraph_image,
-			$objPage->opengraph_image
-		));
-		*/
-		
+
 		// TODO $objPage->opengraph_type;
 
 		$GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootTitle);
-		
+
 	}
+
+
+    public function parseArticlesHook($objTemplate, $articleRow, $objModule) {
+        global $objPage;
+
+        if ($objModule->opengraph_enable !== '1') {
+            return;
+        }
+
+        $objRootPage = \PageModel::findByPk($objPage->rootId);
+
+        if ($objRootPage->opengraph_enable !== '1') {
+            return;
+        }
+
+        if ($GLOBALS['TL_HEAD'] === null) {
+            $GLOBALS['TL_HEAD'] = array();
+        }
+
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($articleRow['headline']);
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag(\Environment::get('base').$objTemplate->link);
+
+        if ($articleRow['addImage'] === '1') {
+            $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
+            if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
+
+                $imgSize = deserialize($objRootPage->opengraph_size);
+                $ogImage = \Image::get($filesModel->path, $imgSize[0], $imgSize[1], $imgSize[2]);
+
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base').$ogImage);
+            }
+        }
+
+    }
+
 	
 }
 

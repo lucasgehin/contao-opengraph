@@ -2,45 +2,38 @@
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2013 Leo Feyer
+ * Copyright (C) 2005-2014 Leo Feyer
  *
  *
  * PHP version 5
- * @copyright  Martin Kozianka 2012-2013 <http://kozianka.de/>
+ * @copyright  Martin Kozianka 2012-2014 <http://kozianka.de/>
  * @author     Martin Kozianka <http://kozianka.de/>
  * @package    opengraph
  * @license    LGPL
  * @filesource
  */
+namespace OpenGraph;
 
 class OpenGraph {
-	public static $TMPL = '<meta property="og:%s" content="%s"/>';
 
 	public static function getOgImageTag($value) {
-		return sprintf(self::$TMPL, 'image', $value);
-	} 
+        return '<meta property="og:image" content="'.$value.'"/>';
+	}
 
 	public static function getOgTitleTag($value) {
-		return sprintf(self::$TMPL, 'title', htmlspecialchars($value));
+        return '<meta property="og:title" content="'.htmlspecialchars($value).'"/>';
 	}
 	
 	public static function getOgUrlTag($value) {
-		return sprintf(self::$TMPL, 'url', $value);
+        return '<meta property="og:url" content="'.$value.'"/>';
 	}
 	
 	public static function getOgSiteNameTag($value) {
-		return sprintf(self::$TMPL, 'site_name', htmlspecialchars($value));
+        return '<meta property="og:site_name" content="'.htmlspecialchars($value).'"/>';
 	}
 
 	public static function getOgTypeTag($value) {
-		return sprintf(self::$TMPL, 'type', $value);
-	}
-
-	public static function imageSettings() {
-		if ($GLOBALS['TL_CONFIG']['opengraph_size']) {
-			return unserialize($GLOBALS['TL_CONFIG']['opengraph_size']);
-		}
-		return array(512, 512, 'center_center');
+        return '<meta property="og:type" content="'.$value.'"/>';
 	}
 
 }

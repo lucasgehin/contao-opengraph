@@ -1,4 +1,10 @@
 <?php
 
 $GLOBALS['TL_LANG']['tl_page']['opengraph_legend']      = 'OpenGraph';
-$GLOBALS['TL_LANG']['tl_page']['add_opengraph_image']   = array('OpenGraph Metatag Image', 'Add this image as OpenGraph Metatag Image.');
+$GLOBALS['TL_LANG']['tl_page']['opengraph_enable']      = array('OpenGraph metatags', 'Add OpenGraph metatags.');
+$GLOBALS['TL_LANG']['tl_page']['opengraph_size']        = array('OpenGraph image format', 'Format for OpenGraph images');
+$GLOBALS['TL_LANG']['tl_page']['opengraph_image']       = array('OpenGraph metatag Image', 'Add this image as OpenGraph metatag image.');
+
+
+
+
