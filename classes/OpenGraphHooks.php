@@ -49,8 +49,6 @@ class OpenGraphHooks extends \Controller {
 			}
 		}
 
-
-
 		if (!$blnOG['title']) {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->title);
 		}
@@ -100,7 +98,7 @@ class OpenGraphHooks extends \Controller {
                 if (!file_exists(TL_ROOT . '/favicon.ico')) {
                     self::generateFavicon($filesModel->path);
                 }
-                $GLOBALS['TL_HEAD'][] = '<link rel="shortcut icon" href="/favicon.ico">';
+                $GLOBALS['TL_HEAD'][] = '<link rel="shortcut icon" href="//'.\Environment::get('host').'/favicon.ico">';
             }
 
             // TODO <link rel="apple-touch-startup-image" href="images/startup.png" />
