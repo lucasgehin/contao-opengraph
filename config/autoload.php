@@ -14,4 +14,5 @@
 ClassLoader::addClasses(array(
     'OpenGraph\OpenGraph'              => 'system/modules/opengraph/classes/OpenGraph.php',
     'OpenGraph\OpenGraphHooks'         => 'system/modules/opengraph/classes/OpenGraphHooks.php',
+    'floIcon'                          => 'system/modules/opengraph/classes/floIcon.php',
 ));
