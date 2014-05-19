@@ -1,0 +1,40 @@
+{
+    "name":"martin-kozianka/contao-opengraph",
+    "description":"Opengraph",
+    "keywords":["contao", "opengraph", "facebook"],
+    "type":"contao-module",
+    "homepage":"",
+    "license":"LGPL-3.0+",
+    "authors":[
+        {
+            "name":"Martin Kozianka",
+            "email":"martin@kozianka.de",
+            "homepage":"http://kozianka.de",
+            "role":"Developer"
+        }
+    ],
+    "support":{
+        "email":"martin@kozianka.de",
+        "issues":"https://github.com/kozi/opengraph/issues",
+        "irc":"irc://irc.freenode.org/contao.dev",
+        "source":"https://github.com/kozi/opengraph"
+
+    },
+    "require":{
+        "php":">=5.3",
+        "contao/core":">=3.2,<4"
+    },
+    "replace":{
+        "contao-legacy/opengraph": "*"
+    },
+    "autoload": {
+        "classmap": ["src/"]
+    },
+    "extra":{
+        "contao": {
+            "sources":{
+                "src": "system/modules/opengraph"
+            }
+        }
+    }
+}
