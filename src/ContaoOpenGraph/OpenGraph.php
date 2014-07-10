@@ -12,7 +12,7 @@
  * @license    LGPL
  * @filesource
  */
-namespace OpenGraph;
+namespace ContaoOpenGraph;
 
 class OpenGraph {
 

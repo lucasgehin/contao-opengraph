@@ -15,9 +15,9 @@
     ],
     "support":{
         "email":"martin@kozianka.de",
-        "issues":"https://github.com/kozi/opengraph/issues",
+        "issues":"https://github.com/kozi/contao-opengraph/issues",
         "irc":"irc://irc.freenode.org/contao.dev",
-        "source":"https://github.com/kozi/opengraph"
+        "source":"https://github.com/kozi/contao-opengraph"
 
     },
     "require":{
@@ -28,12 +28,14 @@
         "contao-legacy/opengraph": "*"
     },
     "autoload": {
-        "classmap": ["src/"]
+        "psr-0": {
+            "ContaoOpenGraph": "src/"
+        }
     },
     "extra":{
         "contao": {
             "sources":{
-                "src": "system/modules/opengraph"
+                "contao": "system/modules/opengraph"
             }
         }
     }

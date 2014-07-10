@@ -13,7 +13,7 @@
  * @filesource
  */
 
-namespace OpenGraph;
+namespace ContaoOpenGraph;
 
 class OpenGraphHooks extends \Controller {
 
