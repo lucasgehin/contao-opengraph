@@ -1,4 +1,7 @@
 <?php
+
+namespace ContaoOpenGraph;
+
 /***************************************************************************
  *  Original floIcon copyright (C) 2007 by Joshua Hatfield.                *
  *                                                                         *

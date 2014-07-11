@@ -146,8 +146,8 @@ class OpenGraphHooks extends \Controller {
     }
 
     public static function generateFavicon($imgPath) {
-        require_once(TL_ROOT. '/system/modules/opengraph/classes/floIcon.php');
-        $floIcon      = new \floIcon();
+
+        $floIcon      = new floIcon();
         $arrIconSizes = array(16, 24, 32, 64, 128, 256);
         $imgSize      = getimagesize(TL_ROOT . '/' . $imgPath);
 
