@@ -62,7 +62,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_image'] = array
 );
 
 
-
 class tl_page_opengraph {
 
     public function favicon(DataContainer $dc) {
@@ -71,7 +70,7 @@ class tl_page_opengraph {
 
             $filesModel = \FilesModel::findByUuid($dc->activeRecord->opengraph_image);
             if ($filesModel != null) {
-                \OpenGraphHooks::generateFavicon($filesModel->path);
+                \ContaoOpenGraph\OpenGraphHooks::generateFavicon($filesModel->path);
             }
 
         }
