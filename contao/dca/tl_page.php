@@ -61,16 +61,14 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_image'] = array
     'sql'                       => "binary(16) NULL",
 );
 
-
 class tl_page_opengraph {
 
     public function favicon(DataContainer $dc) {
         if ($dc->activeRecord->type == 'root' && $dc->activeRecord->opengraph_enable == '1'
             && $dc->activeRecord->opengraph_favicon == '1') {
-
             $filesModel = \FilesModel::findByUuid($dc->activeRecord->opengraph_image);
             if ($filesModel != null) {
-                \OpenGraphHooks::generateFavicon($filesModel->path);
+                \ContaoOpenGraph\OpenGraphHooks::generateFavicon($filesModel->path);
             }
 
         }

@@ -11,6 +11,5 @@ Thumbs.db
 nbproject/
 
 # dependencies
-build
-vendor
+vendor/
 composer.lock
