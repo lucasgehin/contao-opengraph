@@ -70,7 +70,7 @@ class tl_page_opengraph {
 
             $filesModel = \FilesModel::findByUuid($dc->activeRecord->opengraph_image);
             if ($filesModel != null) {
-                \ContaoOpenGraph\OpenGraphHooks::generateFavicon($filesModel->path);
+                \OpenGraphHooks::generateFavicon($filesModel->path);
             }
 
         }
