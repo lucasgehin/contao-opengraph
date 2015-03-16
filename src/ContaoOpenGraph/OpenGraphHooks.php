@@ -75,7 +75,7 @@ class OpenGraphHooks extends \Controller {
             if ($filesModel != null) {
                 $imgSize              = deserialize($objRootPage->opengraph_size);
                 $img                  = \Image::get($filesModel->path, $imgSize[0], $imgSize[1], $imgSize[2]);
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag($img);
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base') . $img);
             }
 
             if($objRootPage->opengraph_apple_touch_icon) {
