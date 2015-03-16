@@ -61,7 +61,7 @@ class OpenGraphHooks extends \Controller {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
 		}
 
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootTitle);
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootPageTitle);
 
 		if (!$blnOG['image']) {
 
