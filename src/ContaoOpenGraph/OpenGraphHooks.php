@@ -52,6 +52,9 @@ class OpenGraphHooks extends \Controller {
 		if (!$blnOG['title']) {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->title);
 		}
+        if (!$blnOG['description']) {
+            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
+        }
 
 		if (!$blnOG['url']) {
 			$url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
