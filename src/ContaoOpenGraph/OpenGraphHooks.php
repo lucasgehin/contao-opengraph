@@ -52,13 +52,16 @@ class OpenGraphHooks extends \Controller {
 		if (!$blnOG['title']) {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->title);
 		}
+        if (!$blnOG['description']) {
+            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
+        }
 
 		if (!$blnOG['url']) {
 			$url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
 		}
 
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootTitle);
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootPageTitle);
 
 		if (!$blnOG['image']) {
 
@@ -72,7 +75,7 @@ class OpenGraphHooks extends \Controller {
             if ($filesModel != null) {
                 $imgSize              = deserialize($objRootPage->opengraph_size);
                 $img                  = \Image::get($filesModel->path, $imgSize[0], $imgSize[1], $imgSize[2]);
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag($img);
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base') . $img);
             }
 
             if($objRootPage->opengraph_apple_touch_icon) {

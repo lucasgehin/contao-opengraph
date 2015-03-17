@@ -24,6 +24,10 @@ class OpenGraph {
         return '<meta property="og:title" content="'.htmlspecialchars($value).'"/>';
 	}
 	
+	public static function getOgDescriptionTag($value) {
+        return '<meta property="og:description" content="'.htmlspecialchars($value).'"/>';
+	}
+
 	public static function getOgUrlTag($value) {
         return '<meta property="og:url" content="'.$value.'"/>';
 	}
