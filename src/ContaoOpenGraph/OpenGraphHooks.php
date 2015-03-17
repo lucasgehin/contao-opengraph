@@ -2,11 +2,11 @@
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2014 Leo Feyer
+ * Copyright (C) 2005-2015 Leo Feyer
  *
  *
  * PHP version 5
- * @copyright  Martin Kozianka 2012-2014 <http://kozianka.de/>
+ * @copyright  Martin Kozianka 2012-2015 <http://kozianka.de/>
  * @author     Martin Kozianka <http://kozianka.de/>
  * @package    opengraph
  * @license    LGPL
@@ -15,19 +15,30 @@
 
 namespace ContaoOpenGraph;
 
+use Contao\Image;
+
 class OpenGraphHooks extends \Controller {
+
+    // https://developers.facebook.com/docs/sharing/best-practices#images
+    private $arrResizeMode = [
+        'mode'   => 'crop',
+        'width'  => 1200,
+        'height' => 630
+    ];
 
 	public function addOpenGraphDefinition($strContent, $strTemplate) {
 
         global $objPage;
+        $objRootPage = \PageModel::findByPk($objPage->rootId);
+        if ($objRootPage->opengraph_enable !== '1') {
+            // OpenGraph not enabled in root page
+            return $strContent;
+        }
 
-        if (array_key_exists('opengraph_enable', $GLOBALS['TL_CONFIG'])
-				&& $GLOBALS['TL_CONFIG']['opengraph_enable'] === true
-                && $strTemplate == 'fe_page'
-                && strpos($strContent, 'ogp.me') === false) {
+        if ($strTemplate == 'fe_page' && strpos($strContent, 'ogp.me') === false) {
             $strContent = str_replace('<html', '<html prefix="og: http://ogp.me/ns#"', $strContent);
 		}
-		return $strContent;
+        return $strContent;
 	}
 
 	public function addOpenGraphTags(\PageModel $objPage, \LayoutModel $objLayout, \PageRegular $objPageRegular) {
@@ -39,20 +50,33 @@ class OpenGraphHooks extends \Controller {
             return;
         }
 
-        $blnOG = array('image' => false, 'title' => false, 'url'   => false);
-		
+        $blnOG = array(
+            'site_name'   => false,
+            'title'       => false,
+            'description' => false,
+            'url'         => false,
+            'image'       => false
+        );
+
 		if(is_array($GLOBALS['TL_HEAD'])) {
 			foreach ($GLOBALS['TL_HEAD'] as $head) {
-				$blnOG['image'] = $blnOG['image'] || (strpos($head, 'og:image') > 0);
-				$blnOG['title'] = $blnOG['title'] || (strpos($head, 'og:title') > 0);
-				$blnOG['url']   = $blnOG['url']   || (strpos($head, 'og:url') > 0);
+                $blnOG['site_name']   = $blnOG['site_name'] || (strpos($head, 'og:site_name') > 0);
+                $blnOG['title']       = $blnOG['title'] || (strpos($head, 'og:title') > 0);
+                $blnOG['description'] = $blnOG['description'] || (strpos($head, 'og:description') > 0);
+                $blnOG['url']         = $blnOG['url'] || (strpos($head, 'og:url') > 0);
+				$blnOG['image']       = $blnOG['image'] || (strpos($head, 'og:image') > 0);
 			}
 		}
 
-		if (!$blnOG['title']) {
+        if (!$blnOG['site_name']) {
+            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootPageTitle);
+        }
+
+        if (!$blnOG['title']) {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->title);
-		}
-        if (!$blnOG['description']) {
+        }
+
+        if (!$blnOG['description'] && $objPage->description) {
             $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
         }
 
@@ -61,7 +85,7 @@ class OpenGraphHooks extends \Controller {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
 		}
 
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootPageTitle);
+        // TODO $objPage->opengraph_type;
 
 		if (!$blnOG['image']) {
 
@@ -71,49 +95,13 @@ class OpenGraphHooks extends \Controller {
                     $filesModel = \FilesModel::findByUuid($parent->opengraph_image);
                 }
             }
-
-            if ($filesModel != null) {
-                $imgSize              = deserialize($objRootPage->opengraph_size);
-                $img                  = \Image::get($filesModel->path, $imgSize[0], $imgSize[1], $imgSize[2]);
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base') . $img);
+            if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
+                $ogImage              = \Image::get($filesModel->path, $this->arrResizeMode['width'], $this->arrResizeMode['height'], $this->arrResizeMode['mode']);
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base') . $ogImage);
             }
-
-            if($objRootPage->opengraph_apple_touch_icon) {
-                // Add apple touch icon
-                $GLOBALS['TL_HEAD'][] = self::appleTouchIcon($filesModel->path);
-                $GLOBALS['TL_HEAD'][] = self::appleTouchIcon($filesModel->path, 72);
-                $GLOBALS['TL_HEAD'][] = self::appleTouchIcon($filesModel->path, 114);
-                $GLOBALS['TL_HEAD'][] = self::appleTouchIcon($filesModel->path, 144);
-            }
-
-            if($objRootPage->opengraph_favicon) {
-                
-                $ext       = str_replace('jpg', 'jpeg', $filesModel->extension);
-                $imageType = in_array($ext, array('png','gif','jpeg')) ? ' type="image/'.$ext.'"' : '';
-
-                $GLOBALS['TL_HEAD'][] = sprintf(
-                    '<link rel="icon" href="%s"%s>',
-                    \Image::get($filesModel->path, 64, 64,'center_center'),
-                    $imageType
-                );
-
-                // Old *.ico format
-                if (!file_exists(TL_ROOT . '/favicon.ico')) {
-                    self::generateFavicon($filesModel->path);
-                }
-                $GLOBALS['TL_HEAD'][] = '<link rel="shortcut icon" href="//'.\Environment::get('host').'/favicon.ico">';
-            }
-
-            // TODO <link rel="apple-touch-startup-image" href="images/startup.png" />
-
 		}
 
-		// TODO $objPage->opengraph_type;
-
-
-
-	}
-
+    }
 
     public function parseArticlesHook($objTemplate, $articleRow, $objModule) {
         global $objPage;
@@ -135,56 +123,16 @@ class OpenGraphHooks extends \Controller {
         $GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($articleRow['headline']);
         $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag(\Environment::get('base').$objTemplate->link);
 
+        // $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
+
         if ($articleRow['addImage'] === '1') {
             $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
             if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
-
-                $imgSize = deserialize($objRootPage->opengraph_size);
-                $ogImage = \Image::get($filesModel->path, $imgSize[0], $imgSize[1], $imgSize[2]);
-
+                $ogImage              = \Image::get($filesModel->path, $this->arrResizeMode['width'], $this->arrResizeMode['height'], $this->arrResizeMode['mode']);
                 $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base').$ogImage);
             }
         }
 
     }
 
-    public static function generateFavicon($imgPath) {
-
-        $floIcon      = new floIcon();
-        $arrIconSizes = array(16, 24, 32, 64, 128, 256);
-        $imgSize      = getimagesize(TL_ROOT . '/' . $imgPath);
-
-        foreach ($arrIconSizes as $iconsize) {
-            if ($imgSize[0] >= $iconsize && $imgSize[1] >= $iconsize) {
-                $src = \Image::get($imgPath, $iconsize, $iconsize , 'center_center');
-
-                try {
-                    // add file to ICO file, try PNG, JPG and GIF in order
-                    if (
-                        $image = @imagecreatefrompng(TL_ROOT . '/'. $src) or
-                        $image = @imagecreatefromjpeg(TL_ROOT . '/'. $src) or
-                        $image = @imagecreatefromgif(TL_ROOT . '/'. $src)
-                    )
-                    {
-                        $floIcon->addImage($image, 32);
-                    }
-                }
-                catch (Exception $e) {}
-            }
-        }
-        $objFile = new \File('favicon.ico');
-        $objFile->write($floIcon->formatICO());
-        $objFile->close();
-        return true;
-    }
-
-
-    private static function appleTouchIcon($path, $dim = 57) {
-        $img   = \Image::get($path, $dim, $dim, 'center_center');
-        $sizes = ($dim == 57) ? '' : 'sizes="'.$dim.'x'.$dim.'" ';
-        return '<link rel="apple-touch-icon" '.$sizes.'href="'.$img.'" />';
-    }
 }
-
-
-
