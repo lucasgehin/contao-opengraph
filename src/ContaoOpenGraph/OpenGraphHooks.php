@@ -20,10 +20,11 @@ use Contao\Image;
 class OpenGraphHooks extends \Controller {
 
     // https://developers.facebook.com/docs/sharing/best-practices#images
-    private $arrResizeMode = [
+    public static $arrResizeMode = [
         'mode'   => 'crop',
         'width'  => 1200,
-        'height' => 630
+        'height' => 630,
+        'ratio'  => 1.91
     ];
 
 	public function addOpenGraphDefinition($strContent, $strTemplate) {
@@ -89,15 +90,17 @@ class OpenGraphHooks extends \Controller {
 
 		if (!$blnOG['image']) {
 
+            // TODO Enable or disable recursive search
+
             $filesModel = null;
             foreach (\PageModel::findParentsById($objPage->id) as $parent) {
                 if ($filesModel === null) {
                     $filesModel = \FilesModel::findByUuid($parent->opengraph_image);
                 }
             }
+
             if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
-                $ogImage              = \Image::get($filesModel->path, $this->arrResizeMode['width'], $this->arrResizeMode['height'], $this->arrResizeMode['mode']);
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base') . $ogImage);
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(self::getImageUrl($filesModel));
             }
 		}
 
@@ -123,16 +126,34 @@ class OpenGraphHooks extends \Controller {
         $GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($articleRow['headline']);
         $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag(\Environment::get('base').$objTemplate->link);
 
-        // $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
+        // TODO $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
 
         if ($articleRow['addImage'] === '1') {
             $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
             if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
-                $ogImage              = \Image::get($filesModel->path, $this->arrResizeMode['width'], $this->arrResizeMode['height'], $this->arrResizeMode['mode']);
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base').$ogImage);
+                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(self::getImageUrl($filesModel));
             }
         }
-
     }
 
+    /**
+     * Get url for given file model
+     *
+     * @param \FilesModel $filesModel
+     *
+     * @return string Absolute url for given file model
+     */
+    public static function getImageUrl($filesModel) {
+        $arrResize = self::arrResizeMode;
+        $fileObj   = new \File($filesModel->path);
+
+        // Do not enlarge the image
+        if ($fileObj->width < $arrResize['width']) {
+            $arrResize['height'] = floor($fileObj->width / $arrResize['ratio']);
+            $arrResize['width']  = $fileObj->width;
+        }
+
+        $ogImage = \Image::get($filesModel->path, $arrResize['width'], $arrResize['height'], $arrResize['mode']);
+        return \Environment::get('base').$ogImage;
+    }
 }
