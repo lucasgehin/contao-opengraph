@@ -21,10 +21,9 @@ class OpenGraphHooks extends \Controller {
 
     // https://developers.facebook.com/docs/sharing/best-practices#images
     public static $arrResizeMode = [
-        'mode'   => 'crop',
         'width'  => 1200,
         'height' => 630,
-        'ratio'  => 1.91
+        'ratio'  => 1.91 // (width/height)
     ];
 
 	public function addOpenGraphDefinition($strContent, $strTemplate) {
@@ -56,8 +55,11 @@ class OpenGraphHooks extends \Controller {
             'title'       => false,
             'description' => false,
             'url'         => false,
-            'image'       => false
+            'image'       => false,
+            'locale'      => false
         );
+
+
 
 		if(is_array($GLOBALS['TL_HEAD'])) {
 			foreach ($GLOBALS['TL_HEAD'] as $head) {
@@ -65,10 +67,18 @@ class OpenGraphHooks extends \Controller {
                 $blnOG['title']       = $blnOG['title'] || (strpos($head, 'og:title') > 0);
                 $blnOG['description'] = $blnOG['description'] || (strpos($head, 'og:description') > 0);
                 $blnOG['url']         = $blnOG['url'] || (strpos($head, 'og:url') > 0);
-				$blnOG['image']       = $blnOG['image'] || (strpos($head, 'og:image') > 0);
+                $blnOG['image']       = $blnOG['image'] || (strpos($head, 'og:image') > 0);
+                $blnOG['locale']      = $blnOG['locale'] || (strpos($head, 'og:locale') > 0);
+
 			}
 		}
 
+        /*
+        if (!$blnOG['locale']) {
+            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgLocaleTag('');
+        }
+        */
+        
         if (!$blnOG['site_name']) {
             $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootPageTitle);
         }
@@ -86,12 +96,13 @@ class OpenGraphHooks extends \Controller {
 			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
 		}
 
+
+
         // TODO $objPage->opengraph_type;
 
 		if (!$blnOG['image']) {
 
             // TODO Enable or disable recursive search
-
             $filesModel = null;
             foreach (\PageModel::findParentsById($objPage->id) as $parent) {
                 if ($filesModel === null) {
@@ -99,9 +110,7 @@ class OpenGraphHooks extends \Controller {
                 }
             }
 
-            if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(self::getImageUrl($filesModel));
-            }
+            self::addOpenGraphImage($filesModel);
 		}
 
     }
@@ -130,21 +139,23 @@ class OpenGraphHooks extends \Controller {
 
         if ($articleRow['addImage'] === '1') {
             $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
-            if ($filesModel !== null && is_file(TL_ROOT . '/' . $filesModel->path)) {
-                $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(self::getImageUrl($filesModel));
-            }
+            self::addOpenGraphImage($filesModel);
         }
     }
 
     /**
-     * Get url for given file model
+     * Add opengraph image tag to TL_HEAD array
      *
      * @param \FilesModel $filesModel
      *
-     * @return string Absolute url for given file model
      */
-    public static function getImageUrl($filesModel) {
-        $arrResize = self::arrResizeMode;
+    public static function addOpenGraphImage($filesModel) {
+
+        if ($filesModel === null || !is_file(TL_ROOT . '/' . $filesModel->path)) {
+            return false;
+        }
+
+        $arrResize = self::$arrResizeMode;
         $fileObj   = new \File($filesModel->path);
 
         // Do not enlarge the image
@@ -153,7 +164,11 @@ class OpenGraphHooks extends \Controller {
             $arrResize['width']  = $fileObj->width;
         }
 
-        $ogImage = \Image::get($filesModel->path, $arrResize['width'], $arrResize['height'], $arrResize['mode']);
-        return \Environment::get('base').$ogImage;
+        $ogImage = \Image::get($filesModel->path, $arrResize['width'], $arrResize['height'], 'crop');
+
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base').$ogImage);
+
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageWidthTag($arrResize['width']);
+        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageHeightTag($arrResize['height']);
     }
 }
