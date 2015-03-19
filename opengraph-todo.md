@@ -1,7 +1,5 @@
-Opengraph for Contao
+TODO
 
-OpenGraph Page --> Check Content Elements check for checkbox in CE
-	--> automatisch oder setzen als Attribute einer Seite
-	--> page_image auswerten
-OpenGraph NewsReader --> News Image, title
-OpenGrapg Events --> Event Image, title
+* Inhaltselement als Quellen für Opengraph Metatags verwenden
+* Automatisch oder setzen als Attribute einer Seite
+	
