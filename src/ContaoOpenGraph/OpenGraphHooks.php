@@ -81,7 +81,7 @@ class OpenGraphHooks extends \Controller {
         }
 
         if (!$blnOG['title']) {
-			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->title);
+			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->pageTitle);
         }
 
         if (!$blnOG['description'] && $objPage->description) {
@@ -144,10 +144,9 @@ class OpenGraphHooks extends \Controller {
             $GLOBALS['TL_HEAD'] = array();
         }
 
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($articleRow['headline']);
+        // title and description is set by news reader module
+        // news reader module overrides $objPage->pageTitle and $objPage->description
         $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag(\Environment::get('base').$objTemplate->link);
-
-        // TODO $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
 
         if ($articleRow['addImage'] === '1') {
             $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
