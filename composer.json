@@ -20,10 +20,12 @@
 
     },
     "require":{
-        "php": ">=5.5",
-        "contao/core": ">=3.4,<4",
         "contao-community-alliance/composer-plugin": "~2"
     },
+    "require-dev": {
+        "php": ">=5.5",
+        "contao/core": ">=3.4"
+    },    
     "replace":{
         "contao-legacy/opengraph": "*"
     },
