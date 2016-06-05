@@ -26,7 +26,7 @@ class OpenGraphHooks extends \Controller {
         'ratio'  => 1.91 // (width/height)
     ];
 
-	public function addOpenGraphDefinition($strContent, $strTemplate) {
+    public function addOpenGraphDefinition($strContent, $strTemplate) {
 
         global $objPage;
         $objRootPage = \PageModel::findByPk($objPage->rootId);
@@ -37,11 +37,11 @@ class OpenGraphHooks extends \Controller {
 
         if ($strTemplate == 'fe_page' && strpos($strContent, 'ogp.me') === false) {
             $strContent = str_replace('<html', '<html prefix="og: http://ogp.me/ns#"', $strContent);
-		}
+        }
         return $strContent;
-	}
+    }
 
-	public function addOpenGraphTags(\PageModel $objPage, \LayoutModel $objLayout, \PageRegular $objPageRegular) {
+    public function addOpenGraphTags(\PageModel $objPage, \LayoutModel $objLayout, \PageRegular $objPageRegular) {
 
         $objRootPage = \PageModel::findByPk($objPage->rootId);
 
@@ -59,16 +59,16 @@ class OpenGraphHooks extends \Controller {
             'locale'      => false
         );
 
-		if(is_array($GLOBALS['TL_HEAD'])) {
-			foreach ($GLOBALS['TL_HEAD'] as $head) {
+        if(is_array($GLOBALS['TL_HEAD'])) {
+            foreach ($GLOBALS['TL_HEAD'] as $head) {
                 $blnOG['site_name']   = $blnOG['site_name'] || (strpos($head, 'og:site_name') > 0);
                 $blnOG['title']       = $blnOG['title'] || (strpos($head, 'og:title') > 0);
                 $blnOG['description'] = $blnOG['description'] || (strpos($head, 'og:description') > 0);
                 $blnOG['url']         = $blnOG['url'] || (strpos($head, 'og:url') > 0);
                 $blnOG['image']       = $blnOG['image'] || (strpos($head, 'og:image') > 0);
                 $blnOG['locale']      = $blnOG['locale'] || (strpos($head, 'og:locale') > 0);
-			}
-		}
+            }
+        }
 
         /*
         if (!$blnOG['locale']) {
@@ -81,17 +81,17 @@ class OpenGraphHooks extends \Controller {
         }
 
         if (!$blnOG['title']) {
-			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->pageTitle);
+            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->pageTitle);
         }
 
         if (!$blnOG['description'] && $objPage->description) {
             $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
         }
 
-		if (!$blnOG['url']) {
-			$url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
-			$GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
-		}
+        if (!$blnOG['url']) {
+            $url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
+            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
+        }
 
         // TODO $objPage->opengraph_type;
 
@@ -100,7 +100,7 @@ class OpenGraphHooks extends \Controller {
         $usePageImage = ($objRootPage->opengraph_pageimage === '1') && (in_array('pageimage', \ModuleLoader::getActive()));
 
         // Wurde schon ein Bild eingefügt?
-		if (!$blnOG['image']) {
+        if (!$blnOG['image']) {
 
             if ($usePageImage) {
                 $arrUuids   = deserialize($objPage->pageImage);
@@ -123,7 +123,7 @@ class OpenGraphHooks extends \Controller {
                 }
             }
             self::addOpenGraphImage($filesModel);
-		}
+        }
 
     }
 

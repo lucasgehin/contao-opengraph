@@ -16,25 +16,25 @@ namespace ContaoOpenGraph;
 
 class OpenGraph {
 
-	public static function getOgTitleTag($value) {
+    public static function getOgTitleTag($value) {
         return '<meta property="og:title" content="'.htmlspecialchars($value).'"/>';
-	}
-	
-	public static function getOgDescriptionTag($value) {
+    }
+    
+    public static function getOgDescriptionTag($value) {
         return '<meta property="og:description" content="'.htmlspecialchars($value).'"/>';
-	}
+    }
 
-	public static function getOgUrlTag($value) {
+    public static function getOgUrlTag($value) {
         return '<meta property="og:url" content="'.$value.'"/>';
-	}
-	
-	public static function getOgSiteNameTag($value) {
+    }
+    
+    public static function getOgSiteNameTag($value) {
         return '<meta property="og:site_name" content="'.htmlspecialchars($value).'"/>';
-	}
+    }
 
-	public static function getOgTypeTag($value) {
+    public static function getOgTypeTag($value) {
         return '<meta property="og:type" content="'.$value.'"/>';
-	}
+    }
 
     public static function getOgImageTag($value) {
         return '<meta property="og:image" content="'.$value.'"/>';

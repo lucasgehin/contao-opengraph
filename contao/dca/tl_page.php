@@ -27,21 +27,21 @@ $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][]     = array('tl_pag
 
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_enable'] = array(
-    'label'		                => &$GLOBALS['TL_LANG']['tl_page']['opengraph_enable'],
+    'label'                        => &$GLOBALS['TL_LANG']['tl_page']['opengraph_enable'],
     'inputType'                 => 'checkbox',
     'eval'                      => array('tl_class'=>'m12', 'submitOnChange' => true),
     'sql'                       => "char(1) NOT NULL default ''"
 );
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_pageimage'] = array(
-    'label'		                => &$GLOBALS['TL_LANG']['tl_page']['opengraph_pageimage'],
+    'label'                        => &$GLOBALS['TL_LANG']['tl_page']['opengraph_pageimage'],
     'inputType'                 => 'checkbox',
     'eval'                      => array('tl_class'=>'w50 m12', 'submitOnChange' => true),
     'sql'                       => "char(1) NOT NULL default ''"
 );
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_img_recursive'] = array(
-    'label'		                => &$GLOBALS['TL_LANG']['tl_page']['opengraph_img_recursive'],
+    'label'                        => &$GLOBALS['TL_LANG']['tl_page']['opengraph_img_recursive'],
     'inputType'                 => 'checkbox',
     'eval'                      => array('tl_class'=>'w50 m12'),
     'sql'                       => "char(1) NOT NULL default ''"
@@ -49,9 +49,9 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_img_recursive'] = array(
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['opengraph_image'] = array(
     'label'                     => &$GLOBALS['TL_LANG']['tl_page']['opengraph_image'],
-    'exclude'					=> true,
-    'inputType'					=> 'fileTree',
-    'eval'						=> array('extensions' => 'png,gif,jpg,jpeg', 'files' => true, 'fieldType' => 'radio'),
+    'exclude'                    => true,
+    'inputType'                    => 'fileTree',
+    'eval'                        => array('extensions' => 'png,gif,jpg,jpeg', 'files' => true, 'fieldType' => 'radio'),
     'sql'                       => "binary(16) NULL",
 );
 
