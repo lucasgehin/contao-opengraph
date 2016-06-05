@@ -26,6 +26,68 @@ class OpenGraphHooks extends \Controller {
         'ratio'  => 1.91 // (width/height)
     ];
 
+    /**
+     * Keep track of which tags already exist in the page
+     * @var array
+     */
+    private $existingTags = false;
+
+    /**
+     * Checks which tags exist
+     * @return void
+     */
+    private function checkExistingTags() {
+        $this->existingTags = array(
+            'og:site_name' => false,
+
+            'og:title' => false,
+
+            'og:description' => false,
+
+            'og:url' => false,
+
+            'og:image' => false,
+
+            'og:locale'      => false,
+        );
+
+        if(is_array($GLOBALS['TL_HEAD'])) {
+            foreach ($GLOBALS['TL_HEAD'] as $head) {
+                foreach ($this->existingTags as $tagName => $tagExists) {
+                    if(strpos($head, $tagName) > 0) $this->existingTags[$tagName] = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * This method adds the given social media metatag to the head, if not already defined
+     * 
+     * @param String $tagContent The metatag content, e.g. 'og:title'
+     * @param String $tagValue   The metatag value, e.g. 'Example Website Name'
+     * @return void
+     */
+    public function addTag($tagContent, $tagValue) {
+        if ($this->existingTags === false) {
+            $this->checkExistingTags();
+        }
+        if ($this->existingTags[$tagContent]) {
+            return;
+        }
+        $this->existingTags[$tagContent] = true;
+
+        if(!is_array($GLOBALS['TL_HEAD'])) {
+            $GLOBALS['TL_HEAD'] = array();
+        }
+
+        $tagContent = implode(array_map('ucfirst', explode(':', $tagContent)));
+        $tagContent = implode(array_map('ucfirst', explode('_', $tagContent)));
+        $GLOBALS['TL_HEAD'][] = OpenGraph::{'get' . $tagContent . 'Tag'}($tagValue);
+    }
+
+    /**
+     * If enabled, add the correct OpenGraph namespace declaration
+     */
     public function addOpenGraphDefinition($strContent, $strTemplate) {
 
         global $objPage;
@@ -41,6 +103,15 @@ class OpenGraphHooks extends \Controller {
         return $strContent;
     }
 
+    /**
+     * Adds all the missing OpenGraph tags to the head section.
+     * Triggered by the generatePage hook.
+     * 
+     * @param \PageModel   $objPage        The page object
+     * @param \LayoutModel $objLayout      The page layout
+     * @param \PageRegular $objPageRegular The page regualr object
+     * @return void
+     */
     public function addOpenGraphTags(\PageModel $objPage, \LayoutModel $objLayout, \PageRegular $objPageRegular) {
 
         $objRootPage = \PageModel::findByPk($objPage->rootId);
@@ -50,49 +121,15 @@ class OpenGraphHooks extends \Controller {
             return;
         }
 
-        $blnOG = array(
-            'site_name'   => false,
-            'title'       => false,
-            'description' => false,
-            'url'         => false,
-            'image'       => false,
-            'locale'      => false
-        );
+        // add metatags if missing
+        $this->addTag('og:site_name', $objPage->rootTitle);
+        $this->addTag('og:title', $objPage->pageTitle);
+        $this->addTag('og:description', $objPage->description);
 
-        if(is_array($GLOBALS['TL_HEAD'])) {
-            foreach ($GLOBALS['TL_HEAD'] as $head) {
-                $blnOG['site_name']   = $blnOG['site_name'] || (strpos($head, 'og:site_name') > 0);
-                $blnOG['title']       = $blnOG['title'] || (strpos($head, 'og:title') > 0);
-                $blnOG['description'] = $blnOG['description'] || (strpos($head, 'og:description') > 0);
-                $blnOG['url']         = $blnOG['url'] || (strpos($head, 'og:url') > 0);
-                $blnOG['image']       = $blnOG['image'] || (strpos($head, 'og:image') > 0);
-                $blnOG['locale']      = $blnOG['locale'] || (strpos($head, 'og:locale') > 0);
-            }
-        }
+        $url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
+        $this->addTag('og:url', $url);
 
-        /*
-        if (!$blnOG['locale']) {
-            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgLocaleTag('');
-        }
-        */
-
-        if (!$blnOG['site_name']) {
-            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgSiteNameTag($objPage->rootPageTitle);
-        }
-
-        if (!$blnOG['title']) {
-            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgTitleTag($objPage->pageTitle);
-        }
-
-        if (!$blnOG['description'] && $objPage->description) {
-            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgDescriptionTag($objPage->description);
-        }
-
-        if (!$blnOG['url']) {
-            $url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
-            $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag($url);
-        }
-
+        //$this->addTag('og:locale', '');
         // TODO $objPage->opengraph_type;
 
 
@@ -100,7 +137,7 @@ class OpenGraphHooks extends \Controller {
         $usePageImage = ($objRootPage->opengraph_pageimage === '1') && (in_array('pageimage', \ModuleLoader::getActive()));
 
         // Wurde schon ein Bild eingefügt?
-        if (!$blnOG['image']) {
+        if (!$this->existingTags['og:image']) {
 
             if ($usePageImage) {
                 $arrUuids   = deserialize($objPage->pageImage);
@@ -122,11 +159,20 @@ class OpenGraphHooks extends \Controller {
                     }
                 }
             }
-            self::addOpenGraphImage($filesModel);
+            $this->addOpenGraphImage($filesModel);
         }
 
     }
 
+    /**
+     * Adds all the missing OpenGraph tags, which can be inferred from the article entry to the head section.
+     * Triggered by the parseArticles hook.
+     * 
+     * @param \FrontendTemplate $objTemplate The front end template instance for the news article (e.g. news_full).
+     * @param array             $articleRow  The current news item database result.
+     * @param \ModuleNews       $objModule   The news module instance (e.g. ModuleNewsList).
+     * @return void
+     */
     public function parseArticlesHook($objTemplate, $articleRow, $objModule) {
         global $objPage;
 
@@ -140,27 +186,23 @@ class OpenGraphHooks extends \Controller {
             return;
         }
 
-        if ($GLOBALS['TL_HEAD'] === null) {
-            $GLOBALS['TL_HEAD'] = array();
-        }
-
         // title and description is set by news reader module
         // news reader module overrides $objPage->pageTitle and $objPage->description
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgUrlTag(\Environment::get('base').$objTemplate->link);
+        $this->addTag('og:url', \Environment::get('base').$objTemplate->link);
 
         if ($articleRow['addImage'] === '1') {
             $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
-            self::addOpenGraphImage($filesModel);
+            $this->addOpenGraphImage($filesModel);
         }
     }
 
     /**
-     * Add opengraph image tag to TL_HEAD array
-     *
+     * Add OpenGraph image metatags to the page.
+     * 
      * @param \FilesModel $filesModel
-     *
+     * @return void
      */
-    public static function addOpenGraphImage($filesModel) {
+    public function addOpenGraphImage($filesModel) {
 
         if ($filesModel === null || !is_file(TL_ROOT . '/' . $filesModel->path)) {
             return false;
@@ -175,11 +217,10 @@ class OpenGraphHooks extends \Controller {
             $arrResize['width']  = $fileObj->width;
         }
 
-        $ogImage = \Image::get($filesModel->path, $arrResize['width'], $arrResize['height'], 'crop');
+        $img = \Environment::get('base') . \Image::get($filesModel->path, $arrResize['width'], $arrResize['height'], 'crop');
 
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageTag(\Environment::get('base').$ogImage);
-
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageWidthTag($arrResize['width']);
-        $GLOBALS['TL_HEAD'][] = OpenGraph::getOgImageHeightTag($arrResize['height']);
+        $this->addTag('og:image', $img);
+        $this->addTag('og:image:width', $arrResize['width']);
+        $this->addTag('og:image:height', $arrResize['height']);
     }
 }
