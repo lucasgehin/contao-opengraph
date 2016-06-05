@@ -38,15 +38,21 @@ class OpenGraphHooks extends \Controller {
      */
     private function checkExistingTags() {
         $this->existingTags = array(
+            'twitter:card' => false,
+            'twitter:site' => false,
             'og:site_name' => false,
 
             'og:title' => false,
+            'twitter:title' => false,
 
             'og:description' => false,
+            'twitter:description' => false,
 
             'og:url' => false,
+            'twitter:url' => false,
 
             'og:image' => false,
+            'twitter:image' => false,
 
             'og:locale'      => false,
         );
@@ -104,7 +110,7 @@ class OpenGraphHooks extends \Controller {
     }
 
     /**
-     * Adds all the missing OpenGraph tags to the head section.
+     * Adds all the missing OpenGraph and Twitter Card metatags to the head section.
      * Triggered by the generatePage hook.
      * 
      * @param \PageModel   $objPage        The page object
@@ -122,12 +128,17 @@ class OpenGraphHooks extends \Controller {
         }
 
         // add metatags if missing
+        $this->addTag('twitter:card', ($objPage->opengraph_twitter_card ?: $objRootPage->opengraph_twitter_card) ?: 'summary_large_image');
+        $this->addTag('twitter:site', $objRootPage->opengraph_twitter_site);
         $this->addTag('og:site_name', $objPage->rootTitle);
         $this->addTag('og:title', $objPage->pageTitle);
+        $this->addTag('twitter:title', $objPage->pageTitle);
         $this->addTag('og:description', $objPage->description);
+        $this->addTag('twitter:description', $objPage->description);
 
         $url = \Environment::get('base').$this->generateFrontendUrl($objPage->row());
         $this->addTag('og:url', $url);
+        $this->addTag('twitter:url', $url);
 
         //$this->addTag('og:locale', '');
         // TODO $objPage->opengraph_type;
@@ -137,7 +148,7 @@ class OpenGraphHooks extends \Controller {
         $usePageImage = ($objRootPage->opengraph_pageimage === '1') && (in_array('pageimage', \ModuleLoader::getActive()));
 
         // Wurde schon ein Bild eingefügt?
-        if (!$this->existingTags['og:image']) {
+        if (!$this->existingTags['og:image'] || !$this->existingTags['twitter:image']) {
 
             if ($usePageImage) {
                 $arrUuids   = deserialize($objPage->pageImage);
@@ -165,7 +176,7 @@ class OpenGraphHooks extends \Controller {
     }
 
     /**
-     * Adds all the missing OpenGraph tags, which can be inferred from the article entry to the head section.
+     * Adds all the missing OpenGraph and Twitter Card metatags, which can be inferred from the article entry to the head section.
      * Triggered by the parseArticles hook.
      * 
      * @param \FrontendTemplate $objTemplate The front end template instance for the news article (e.g. news_full).
@@ -189,6 +200,7 @@ class OpenGraphHooks extends \Controller {
         // title and description is set by news reader module
         // news reader module overrides $objPage->pageTitle and $objPage->description
         $this->addTag('og:url', \Environment::get('base').$objTemplate->link);
+        $this->addTag('twitter:url', \Environment::get('base').$objTemplate->link);
 
         if ($articleRow['addImage'] === '1') {
             $filesModel = \FilesModel::findByUuid($articleRow['singleSRC']);
@@ -197,7 +209,7 @@ class OpenGraphHooks extends \Controller {
     }
 
     /**
-     * Add OpenGraph image metatags to the page.
+     * Add OpenGraph and Twitter Card image metatags to the page.
      * 
      * @param \FilesModel $filesModel
      * @return void
@@ -222,5 +234,6 @@ class OpenGraphHooks extends \Controller {
         $this->addTag('og:image', $img);
         $this->addTag('og:image:width', $arrResize['width']);
         $this->addTag('og:image:height', $arrResize['height']);
+        $this->addTag('twitter:image', $img);
     }
 }
