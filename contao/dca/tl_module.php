@@ -14,12 +14,12 @@
  */
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['opengraph_enable'] = array(
-		'label'                   => &$GLOBALS['TL_LANG']['tl_module']['opengraph_enable'],
-		'inputType'               => 'checkbox',
-		'eval'                    => array('tl_class'=>'w50 m12'),
-		'sql'                     => "char(1) NOT NULL default ''",
-		
+        'label'                   => &$GLOBALS['TL_LANG']['tl_module']['opengraph_enable'],
+        'inputType'               => 'checkbox',
+        'eval'                    => array('tl_class'=>'w50 m12'),
+        'sql'                     => "char(1) NOT NULL default ''",
+        
 );
 
 $GLOBALS['TL_DCA']['tl_module']['palettes']['newsreader']  = 
-	str_replace('news_archives', 'news_archives, opengraph_enable', $GLOBALS['TL_DCA']['tl_module']['palettes']['newsreader']);
+    str_replace('news_archives', 'news_archives, opengraph_enable', $GLOBALS['TL_DCA']['tl_module']['palettes']['newsreader']);
