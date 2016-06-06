@@ -2,11 +2,11 @@
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2015 Leo Feyer
+ * Copyright (C) 2005-2016 Leo Feyer
  *
  *
  * PHP version 5
- * @copyright  Martin Kozianka 2012-2015 <http://kozianka.de/>
+ * @copyright  Martin Kozianka 2012-2016 <http://kozianka.de/>
  * @author     Martin Kozianka <http://kozianka.de/>
  * @package    opengraph
  * @license    LGPL
@@ -69,26 +69,23 @@ class OpenGraphHooks extends \Controller {
     /**
      * This method adds the given social media metatag to the head, if not already defined
      * 
-     * @param String $tagContent The metatag content, e.g. 'og:title'
+     * @param String $tagProperty The metatag property, e.g. 'og:title'
      * @param String $tagValue   The metatag value, e.g. 'Example Website Name'
      * @return void
      */
-    public function addTag($tagContent, $tagValue) {
+    public function addTag($tagProperty, $tagValue) {
         if ($this->existingTags === false) {
             $this->checkExistingTags();
         }
-        if ($this->existingTags[$tagContent]) {
+        if ($this->existingTags[$tagProperty]) {
             return;
         }
-        $this->existingTags[$tagContent] = true;
+        $this->existingTags[$tagProperty] = true;
 
         if(!is_array($GLOBALS['TL_HEAD'])) {
             $GLOBALS['TL_HEAD'] = array();
         }
-
-        $tagContent = implode(array_map('ucfirst', explode(':', $tagContent)));
-        $tagContent = implode(array_map('ucfirst', explode('_', $tagContent)));
-        $GLOBALS['TL_HEAD'][] = OpenGraph::{'get' . $tagContent . 'Tag'}($tagValue);
+        $GLOBALS['TL_HEAD'][] = sprintf('<meta property="%s" content="%s"/>', $tagProperty, htmlspecialchars($tagValue));
     }
 
     /**
